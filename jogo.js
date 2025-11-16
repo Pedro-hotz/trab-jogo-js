@@ -91,14 +91,14 @@ const flappyBird = {                           // Objeto flappy bird
 }
 
 
-const messagemInicio = {                          // Objeto chão 
-    spriteX: 134,                           // posição x para fazer o recorte do chão que está na file "sprites.png"                                 
-    spriteY: 0,                         // posição y ==
+const messagemInicio = {                          // Objeto messagem que aparece no inicio  
+    spriteX: 134,                                   // posição x para fazer o recorte do chão que está na file "sprites.png"                                 
+    spriteY: 0,                                      // posição y ==
     largura: 174,
     altura: 152,
     x: (canvas.width / 2) - 174 / 2,               // Faz o chão ficar em baixo, grudado na borda do fim
     y: 50,
-    desenha: function desenha() {         // Função do objeto que faz o aparecer na posição certa
+    desenha() {         // Função do objeto que faz o aparecer na posição certa
         contexto.drawImage(
             sprites,
             messagemInicio.spriteX, messagemInicio.spriteY,
@@ -106,16 +106,8 @@ const messagemInicio = {                          // Objeto chão
             messagemInicio.x, messagemInicio.y,
             messagemInicio.largura, messagemInicio.altura,
         );
-
-        contexto.drawImage(
-            sprites,
-            chao.spriteX, chao.spriteY,
-            chao.largura, chao.altura,
-            (chao.x + chao.largura), chao.y,          // mesma lógica que o plano de fundo 
-            chao.largura, chao.altura,
-        );
-    },
-};
+    }
+}
 
 let activeTela = {}
 
@@ -128,10 +120,11 @@ function updateTela(novaTela) {
 const telas = {
     inicio: {
         desenha() {
-            messagemInicio.desenha();
             planoDeFundo.desenha();
             chao.desenha();
             flappyBird.desenha();
+
+            messagemInicio.desenha();
         },
         atualiza() {
 
@@ -161,11 +154,8 @@ telas.jogo = {
 
 function loop() {                       // função main
 
-
-
-
-    activeTela.desenha()            // Chama a função do objeto / tela que está ativa 
-    activeTela.atualiza()           // ==
+    activeTela.desenha();            // Chama a função do objeto / tela que está ativa 
+    activeTela.atualiza();           // ==
 
 
 
