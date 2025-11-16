@@ -71,6 +71,14 @@ const flappyBird = {                           // Objeto flappy bird
   altura: 24,
   x: 10,
   y: 50,
+  velocidade: 0, 
+  gravidade: 0.25,
+
+  atualiza:function atualiza() { 
+    flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade; // a velocidade aumenta a cada loop chamado
+    flappyBird.y = flappyBird.y + 1; // faz o flappy bird cair 
+  },
+
   desenha: function desenha() {                 // função do objeto, para não ficar repetitivo     
     contexto.drawImage(
       sprites,
@@ -82,15 +90,16 @@ const flappyBird = {                           // Objeto flappy bird
   }
 }
 
-function loop() {
-  // tem que ter essa ordem pois, precisa desenhar o fundo primeiro, depois o chão e para assim o personagem ser desenhado e aparecer na tela
+function loop() {                       // função main
+    // tem que ter essa ordem pois, precisa desenhar o fundo primeiro, depois o chão e para assim o personagem ser desenhado e aparecer na tela
+    // Só que antes de gerar os frames, ele atualiza os valores do personagem 
+  flappyBird.atualiza() // faz o flappy bird cair
+  
   planoDeFundo.desenha();
   chao.desenha();
   flappyBird.desenha();
 
-  flappyBird.y = flappyBird.y + 1; // faz o flappy bird cair 
-
-  requestAnimationFrame(loop);
+  requestAnimationFrame(loop);          // função ajuda a criar os frames da melhor forma 
 }
 
 loop();                                         // Faz o jogo rodar 
