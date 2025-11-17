@@ -37,13 +37,22 @@ const planoDeFundo = {
     },
 };
 
-const chao = {                          // Objeto chão 
+function criarChao(){
+    const chao = {                          // Objeto chão 
     spriteX: 0,                           // posição x para fazer o recorte do chão que está na file "sprites.png"                                 
     spriteY: 610,                         // posição y ==
     largura: 224,
     altura: 112,
     x: 0,
     y: canvas.height - 112,               // Faz o chão ficar em baixo, grudado na borda do fim
+
+    atualiza() {
+        const movimento = 1 
+        const repeteEm = chao.largura / 2
+        const movimentocao = chao.x - movimento 
+        chao.x = movimentocao % repeteEm; 
+
+    }, 
     desenha: function desenha() {         // Função do objeto que faz o aparecer na posição certa
         contexto.drawImage(
             sprites,
@@ -55,41 +64,70 @@ const chao = {                          // Objeto chão
 
         contexto.drawImage(
             sprites,
-            chao.spriteX, chao.spriteY,
-            chao.largura, chao.altura,
-            (chao.x + chao.largura), chao.y,          // mesma lógica que o plano de fundo 
-            chao.largura, chao.altura,
+            this.spriteX, this.spriteY,
+            this.largura, this.altura,
+            (this.x + this.largura), chao.y,          // mesma lógica que o plano de fundo 
+            this.largura, this.altura,
         );
     },
 };
-
-
-const flappyBird = {                           // Objeto flappy bird 
-    spriteX: 0,
-    spriteY: 0,
-    largura: 33,
-    altura: 24,
-    x: 10,
-    y: 50,
-    velocidade: 0,
-    gravidade: 0.25,
-
-    atualiza: function atualiza() {
-        flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade; // a velocidade aumenta a cada loop chamado
-        flappyBird.y = flappyBird.y + 1; // faz o flappy bird cair 
-    },
-
-    desenha: function desenha() {                 // função do objeto, para não ficar repetitivo     
-        contexto.drawImage(
-            sprites,
-            flappyBird.spriteX, flappyBird.spriteY, // Sprite X, Sprite Y
-            flappyBird.largura, flappyBird.altura, // Tamanho do recorte na sprite
-            flappyBird.x, flappyBird.y,
-            flappyBird.largura, flappyBird.altura,
-        );
-    }
+return chao;
 }
 
+function createFlappy() {
+
+    const flappyBird = {                           // Objeto flappy bird 
+        spriteX: 0,
+        spriteY: 0,
+        largura: 33,
+        altura: 24,
+        x: 10,
+        y: 50,
+        pulo: 4.6,
+        velocidade: 0,
+        gravidade: 0.25,
+
+        subir() {
+            this.velocidade = -this.pulo;
+        },
+
+
+        atualiza() {
+
+            if (colisao(flappyBird, globais.chao)) {
+
+                updateTela(telas.inicio)
+                return 
+            }
+
+            this.velocidade += this.gravidade; // a velocidade aumenta a cada loop chamado
+            this.y += this.velocidade// faz o flappy bird cair
+
+        },
+
+        desenha() {                 // função do objeto, para não ficar repetitivo     
+            contexto.drawImage(
+                sprites,
+                this.spriteX, this.spriteY, // Sprite X, Sprite Y
+                this.largura, this.altura, // Tamanho do recorte na sprite
+                this.x, this.y,
+                this.largura, this.altura,
+            );
+        }
+
+    };
+
+    return flappyBird;
+}
+
+
+
+function colisao(flap, chao) { 
+    const flappyBirdY = flap.y + flap.altura;
+    const chaoY = chao.y;
+
+    return flappyBirdY >= chaoY;
+}
 
 const messagemInicio = {                          // Objeto messagem que aparece no inicio  
     spriteX: 134,                                   // posição x para fazer o recorte do chão que está na file "sprites.png"                                 
@@ -113,24 +151,37 @@ let activeTela = {}
 
 function updateTela(novaTela) {
     activeTela = novaTela;
-}
+
+    if (activeTela.inicializa) {
+        activeTela.inicializa();
+    }
+};
 
 
+const globais = {};
 
 const telas = {
     inicio: {
+        inicializa() {
+            
+            globais.chao = criarChao()
+            globais.flappyBird = createFlappy()
+
+        
+        },
+
         desenha() {
             planoDeFundo.desenha();
-            chao.desenha();
-            flappyBird.desenha();
+            globais.chao.desenha();
+            globais.flappyBird.desenha();
 
             messagemInicio.desenha();
         },
         atualiza() {
-
+            globais.chao.atualiza()
         },
         click() {
-            updateTela(telas.jogo) 
+            updateTela(telas.jogo)
         }
     }
 };
@@ -142,11 +193,15 @@ telas.jogo = {
     // Só que antes de gerar os frames, ele atualiza os valores do personagem 
     desenha() {
         planoDeFundo.desenha();
-        chao.desenha();
-        flappyBird.desenha();
+        globais.chao.desenha();
+        globais.flappyBird.desenha();
     },
     atualiza() {
-        flappyBird.atualiza() // faz o flappy bird cair
+        globais.flappyBird.atualiza() // faz o flappy bird cair
+    },
+
+    click() {
+        globais.flappyBird.subir();
     }
 }
 
@@ -164,9 +219,9 @@ function loop() {                       // função main
 }
 
 
-window.addEventListener('click', function(){    // Toda vez que ouver um click na tela , muda a tela de inicio, para a tela do jogo
-                                                // ou seja, chama a função updateTela() com o valor do objeto tela.jogo
-    if(activeTela.click){
+window.addEventListener('click', function () {    // Toda vez que ouver um click na tela , muda a tela de inicio, para a tela do jogo
+    // ou seja, chama a função updateTela() com o valor do objeto tela.jogo
+    if (activeTela.click) {
         activeTela.click();
     }
 });
